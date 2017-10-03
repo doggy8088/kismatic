@@ -35,7 +35,7 @@ func TestDashboardCmdEmptyAddress(t *testing.T) {
 	}
 }
 
-func TestGetDashboardURL(t *testing.T) {
+func TestGetDashboardRequest(t *testing.T) {
 	plan := install.Plan{
 		Cluster: install.Cluster{
 			AdminPassword: "thePassword",
@@ -44,30 +44,16 @@ func TestGetDashboardURL(t *testing.T) {
 			LoadBalancedFQDN: "cluster.apprenda.local",
 		},
 	}
-	url, err := getDashboardRequest(plan)
+	req, err := getDashboardRequest(plan)
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
-	if strings.Contains(req.URL.String(), plan.Cluster.AdminPassword) {
-		t.Errorf("dashboard url contains admin password")
+	_, pass, ok := req.BasicAuth()
+	if !strings.Contains(pass, plan.Cluster.AdminPassword) {
+		t.Errorf("authenticated dashboard request does not contain admin password")
 	}
-}
-
-func TestGetAuthenticatedDashboardURL(t *testing.T) {
-	plan := install.Plan{
-		Cluster: install.Cluster{
-			AdminPassword: "thePassword",
-		},
-		Master: install.MasterNodeGroup{
-			LoadBalancedFQDN: "cluster.apprenda.local",
-		},
-	}
-	url, err := getDashboardRequest(plan)
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
-	}
-	if !strings.Contains(req.URL.String(), plan.Cluster.AdminPassword) {
-		t.Errorf("authenticated dashboard url does not contain admin password")
+	if !ok {
+		t.Errorf("mock request failed to create properly")
 	}
 }
 
