@@ -29,7 +29,7 @@ func TestDashboardCmdMissingPlan(t *testing.T) {
 
 func TestDashboardCmdEmptyAddress(t *testing.T) {
 	plan := install.Plan{}
-	_, err := getDashboardURL(plan)
+	_, err := getDashboardRequest(plan)
 	if err == nil {
 		t.Errorf("dashboard did not return an error when LoadBalancedFQDN is empty")
 	}
@@ -44,11 +44,11 @@ func TestGetDashboardURL(t *testing.T) {
 			LoadBalancedFQDN: "cluster.apprenda.local",
 		},
 	}
-	url, err := getDashboardURL(plan)
+	url, err := getDashboardRequest(plan)
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
-	if strings.Contains(url, plan.Cluster.AdminPassword) {
+	if strings.Contains(req.URL.String(), plan.Cluster.AdminPassword) {
 		t.Errorf("dashboard url contains admin password")
 	}
 }
@@ -62,11 +62,11 @@ func TestGetAuthenticatedDashboardURL(t *testing.T) {
 			LoadBalancedFQDN: "cluster.apprenda.local",
 		},
 	}
-	url, err := getAuthenticatedDashboardURL(plan)
+	url, err := getDashboardRequest(plan)
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
-	if !strings.Contains(url, plan.Cluster.AdminPassword) {
+	if !strings.Contains(req.URL.String(), plan.Cluster.AdminPassword) {
 		t.Errorf("authenticated dashboard url does not contain admin password")
 	}
 }
@@ -83,17 +83,41 @@ func (h timeoutHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 }
 
 func TestVerifyDashboardConnectivity(t *testing.T) {
+	plan := install.Plan{
+		Cluster: install.Cluster{
+			AdminPassword: "thePassword",
+		},
+		Master: install.MasterNodeGroup{
+			LoadBalancedFQDN: "cluster.apprenda.local",
+		},
+	}
+	req, err := http.NewRequest("GET", fmt.Sprintf("https://%s:6443/1", plan.Master.LoadBalancedFQDN), nil)
+	if err != nil {
+		t.Errorf("request failed with error: %q", err)
+	}
 	server := httptest.NewServer(timeoutHandler{})
 	defer server.Close()
-	if err := verifyDashboardConnectivity(server.URL + "/1"); err != nil {
+	if err := verifyDashboardConnectivity(req); err != nil {
 		t.Errorf("dashboard returned an error %v", err)
 	}
 }
 
 func TestVerifyDashboardConnectivityShouldTimeout(t *testing.T) {
+	plan := install.Plan{
+		Cluster: install.Cluster{
+			AdminPassword: "thePassword",
+		},
+		Master: install.MasterNodeGroup{
+			LoadBalancedFQDN: "cluster.apprenda.local",
+		},
+	}
+	req, err := http.NewRequest("GET", fmt.Sprintf("https://%s:6443/3", plan.Master.LoadBalancedFQDN), nil)
+	if err != nil {
+		t.Errorf("request failed with error: %q", err)
+	}
 	server := httptest.NewServer(timeoutHandler{})
 	defer server.Close()
-	if err := verifyDashboardConnectivity(server.URL + "/3"); err == nil {
+	if err := verifyDashboardConnectivity(req); err == nil {
 		t.Errorf("ip returned an error %v", err)
 	}
 }
