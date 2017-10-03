@@ -94,7 +94,7 @@ func doSeedRegistry(stdout, stderr io.Writer, options seedRegistryOptions, image
 
 	// Validate that docker is available
 	if _, err := exec.LookPath("docker"); err != nil {
-		return errors.New("Did not find docker installed on this node. The docker CLI must be available for seeding the registry.")
+		return errors.New("did not find docker installed on this node. The docker CLI must be available for seeding the registry")
 	}
 
 	// Figure out the registry we are to seed
@@ -118,13 +118,13 @@ func doSeedRegistry(stdout, stderr io.Writer, options seedRegistryOptions, image
 		// Validate the registry info in the plan file
 		errs := []error{}
 		if plan.DockerRegistry.Address == "" {
-			errs = append(errs, errors.New("The private registry's address must be set in the plan file."))
+			errs = append(errs, errors.New("the private registry's address must be set in the plan file"))
 		}
 		if plan.DockerRegistry.Port == 0 {
-			errs = append(errs, errors.New("The private registry's port must be set in the plan file."))
+			errs = append(errs, errors.New("the private registry's port must be set in the plan file"))
 		}
 		if plan.DockerRegistry.Port < 1 || plan.DockerRegistry.Port > 65535 {
-			errs = append(errs, fmt.Errorf("The private registry port '%d' provided in the plan file is not valid.", plan.DockerRegistry.Port))
+			errs = append(errs, fmt.Errorf("the private registry port '%d' provided in the plan file is not valid", plan.DockerRegistry.Port))
 		}
 		if len(errs) > 0 {
 			util.PrettyPrintErr(stdout, "Validating registry configured in plan file")
@@ -172,10 +172,7 @@ func seedImage(stdout, stderr io.Writer, img image, registry string, verbose boo
 		return err
 	}
 	// push
-	if err := runDockerCmd("push", privateImgTag); err != nil {
-		return err
-	}
-	return nil
+	return runDockerCmd("push", privateImgTag)
 }
 
 func readImageManifest() (imageManifest, error) {
