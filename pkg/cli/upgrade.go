@@ -282,7 +282,7 @@ func upgradeNodes(in io.Reader, out io.Writer, plan install.Plan, opts upgradeOp
 			var safetyErr error
 			// If we found any unsafe nodes, and we are not doing a partial upgrade, or using --ignore-safety-checks exit.
 			if len(unsafeNodes) > 0 && !opts.partialAllowed {
-				safetyErr = errors.New("unable to perform an online upgrade due to the unsafe conditions detected")
+				safetyErr = errors.New("Unable to perform an online upgrade due to the unsafe conditions detected.")
 			}
 			// Block the upgrade if partial is allowed but there is an etcd or master node
 			// that cannot be upgraded
@@ -290,7 +290,7 @@ func upgradeNodes(in io.Reader, out io.Writer, plan install.Plan, opts upgradeOp
 				for _, n := range unsafeNodes {
 					for _, r := range n.Roles {
 						if r == "master" || r == "etcd" {
-							safetyErr = errors.New("unable to perform an online upgrade due to the unsafe conditions detected")
+							safetyErr = errors.New("Unable to perform an online upgrade due to the unsafe conditions detected.")
 							break
 						}
 					}

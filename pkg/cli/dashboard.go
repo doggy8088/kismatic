@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"time"
 
 	"github.com/apprenda/kismatic/pkg/install"
@@ -64,12 +63,12 @@ func doDashboard(out io.Writer, planner install.Planner, opts *dashboardOpts) er
 		fmt.Fprintln(out, req.URL)
 		return nil
 	}
-	fmt.Fprintln(os.Stdout, "Opening kubernetes dashboard in default browser...")
+	fmt.Fprintln(out, "Opening kubernetes dashboard in default browser...")
 	//Not obvious, but this is for escaping userinfo
 	urlFmted := fmt.Sprintf("https://%s@%s:6443/ui", url.UserPassword("admin", plan.Cluster.AdminPassword), plan.Master.LoadBalancedFQDN)
 	if err := browser.OpenURL(urlFmted); err != nil {
 		// Don't error. Just print a message if something goes wrong
-		fmt.Printf("Unexpected error opening the kubernetes dashboard: %v. You may access it at %q", err, req.URL)
+		fmt.Fprintf(out, "Unexpected error opening the kubernetes dashboard: %v. You may access it at %q", err, req.URL)
 	}
 	return nil
 }
