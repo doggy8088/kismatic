@@ -69,19 +69,11 @@ func (h timeoutHandler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 }
 
 func TestVerifyDashboardConnectivity(t *testing.T) {
-	plan := install.Plan{
-		Cluster: install.Cluster{
-			AdminPassword: "thePassword",
-		},
-		Master: install.MasterNodeGroup{
-			LoadBalancedFQDN: "cluster.apprenda.local",
-		},
-	}
-	req, err := http.NewRequest("GET", fmt.Sprintf("https://%s:6443/1", plan.Master.LoadBalancedFQDN), nil)
+	server := httptest.NewServer(timeoutHandler{})
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/1", server.URL), nil)
 	if err != nil {
 		t.Errorf("request failed with error: %q", err)
 	}
-	server := httptest.NewServer(timeoutHandler{})
 	defer server.Close()
 	if err := verifyDashboardConnectivity(req); err != nil {
 		t.Errorf("dashboard returned an error %v", err)
@@ -89,19 +81,11 @@ func TestVerifyDashboardConnectivity(t *testing.T) {
 }
 
 func TestVerifyDashboardConnectivityShouldTimeout(t *testing.T) {
-	plan := install.Plan{
-		Cluster: install.Cluster{
-			AdminPassword: "thePassword",
-		},
-		Master: install.MasterNodeGroup{
-			LoadBalancedFQDN: "cluster.apprenda.local",
-		},
-	}
-	req, err := http.NewRequest("GET", fmt.Sprintf("https://%s:6443/3", plan.Master.LoadBalancedFQDN), nil)
+	server := httptest.NewServer(timeoutHandler{})
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/3", server.URL), nil)
 	if err != nil {
 		t.Errorf("request failed with error: %q", err)
 	}
-	server := httptest.NewServer(timeoutHandler{})
 	defer server.Close()
 	if err := verifyDashboardConnectivity(req); err == nil {
 		t.Errorf("ip returned an error %v", err)
